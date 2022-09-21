@@ -31,3 +31,5 @@ if __name__ == "__main__":
                 except ValueError as VE:
                     meta_file_data_base.append(path.join(pr_path, pr_file_name))
                     change_file_data_base.append(path.join(pr_path, pr_file_name))
+
+    # TODO: 之后开始写用户结束监视后的 文件筛选 文件自动转换 文件自动转移至目标目录
