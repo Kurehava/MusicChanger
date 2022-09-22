@@ -1,6 +1,8 @@
 import itertools
-from os import walk, path, system
+from os import walk, path, system, remove
+from os.path import exists
 from re import findall
+from shutil import copyfile
 
 from pydub import AudioSegment
 from inputimeout_kureha_edit import inputimeout, TimeoutOccurred
@@ -117,22 +119,91 @@ if __name__ == "__main__":
 
     print("文件筛选模式")
     print("=================")
-    for index in range(len(change_file_list_cut)):
+
+    input_error_flag = 0
+    input_error_strs = ""
+    list_delete_flag = 0
+    list_delete_name = ""
+
+    while True:
+        index = 0
         file_count = 1
+        if index > len(change_file_list_cut) - 1:
+            break
         while True:
             all_change_file_count = len(list(itertools.chain.from_iterable(change_file_list_cut)))
+
             for file_name in change_file_list_cut[index]:
                 print(f"{file_count}. {file_name}")
-                file_count += 1
+            print("=================")
+
+            if input_error_flag == 1:
+                print(f"您的输入\033[31m{input_error_strs}\033[0m不正确,请重新输入。")
+                input_error_flag = 0
+            if list_delete_flag == 1:
+                print(f"\033[32{list_delete_name}\033[0m已成功删除。")
+                list_delete_flag = 0
 
             if index != 0:
-                print(f"预移动文件数{all_change_file_count} 文件标号)删除列表对应文件 n) 下一页 ")
-                # iuput()
+                screen_select = input(f"预移动文件数{all_change_file_count} 文件标号)删除列表对应文件 n) 下一页 ")
+                if screen_select not in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "N", "n"}:
+                    input_error_flag = 1
+                    input_error_strs = screen_select
+                    continue
+                else:
+                    file_count += 1
             elif 0 < index < len(change_file_list_cut) - 1:
-                print(f"预移动文件数{all_change_file_count} 文件标号)删除列表对应文件 n) 下一页 s)上一页")
-                # iuput()
+                screen_select = input(
+                    f"预移动文件数{all_change_file_count} 文件标号)删除列表对应文件 n) 下一页 s)上一页")
+                if screen_select not in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "N", "n", "S", "s"}:
+                    input_error_flag = 1
+                    input_error_strs = screen_select
+                    continue
+                else:
+                    file_count += 1
             elif index == len(change_file_list_cut) - 1:
-                print(f"预移动文件数{all_change_file_count} 文件标号)删除列表对应文件 s)上一页 w)完成开始移动")
-                # iuput()
+                screen_select = input(
+                    f"预移动文件数{all_change_file_count} 文件标号)删除列表对应文件 s)上一页 w)完成开始移动")
+                if screen_select not in {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "W", "w", "S", "s"}:
+                    input_error_flag = 1
+                    input_error_strs = screen_select
+                    continue
+                else:
+                    file_count += 1
+            else:
+                screen_select = None
+
+            if screen_select in {"S", "s"}:
+                index -= 1
+                break
+            elif screen_select in {"N", "n"}:
+                index += 1
+                break
+            elif screen_select in {"W", "w"}:
+                index = len(change_file_list_cut)
+                break
+            else:
+                list_delete_flag = 1
+                list_delete_name = change_file_list_cut[index][int(screen_select)]
+                change_file_list_cut[index].pop(int(screen_select))
+                if exists(list_delete_name):
+                    remove(list_delete_name)
+                continue
+
+    copy_list = list(itertools.chain.from_iterable(change_file_list_cut))
+    save_folder_path = input("Music Save Path >> ").strip(" ").strip("'").strip("\"")
+    music_format = {"FLAC", "OGG", "WAV"}
+
+    copy_file_count = 0
+    for meta_file_path in copy_list:
+        if exists(meta_file_path) and exists(save_folder_path):
+            if meta_file_path.split(".")[-1].upper() in music_format:
+                music = AudioSegment.from_file(meta_file_path)
+                music.export(meta_file_path.replace(f".{meta_file_path.split('.')[-1]}", "") + ".mp3", format="mp3")
+                remove(meta_file_path)
+            copyfile(meta_file_path, save_folder_path)
+        else:
+            copyfile(meta_file_path, save_folder_path)
+
     # TODO: 给文件筛选的选项加上输入判定，用input_checker
     # TODO: 之后开始写用户结束监视后的 文件筛选 文件自动转换 文件自动转移至目标目录
