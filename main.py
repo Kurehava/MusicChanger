@@ -205,5 +205,4 @@ if __name__ == "__main__":
         else:
             copyfile(meta_file_path, save_folder_path)
 
-    # TODO: 给文件筛选的选项加上输入判定，用input_checker
-    # TODO: 之后开始写用户结束监视后的 文件筛选 文件自动转换 文件自动转移至目标目录
+    #TODO: 基本完成，将文件夹选取换用WinAPI，然后DEBUG
