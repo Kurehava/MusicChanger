@@ -205,4 +205,5 @@ if __name__ == "__main__":
         else:
             copyfile(meta_file_path, save_folder_path)
 
-    #TODO: 基本完成，将文件夹选取换用WinAPI，然后DEBUG
+    # TODO: 有时间找找酷狗音乐的文件保存路径的文件
+    # TODO: 基本完成，将文件夹选取换用WinAPI，然后DEBUG
